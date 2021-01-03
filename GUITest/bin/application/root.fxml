@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.*?>
+
+<HBox minHeight="498.99993896484375" prefHeight="499.0000389648412" prefWidth="730.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2">
+  <!-- TODO Add Nodes -->
+  <children>
+    <ImageView fitHeight="498.99993896484375" fitWidth="446.67517328096653" pickOnBounds="true" preserveRatio="true">
+      <image>
+        <Image url="@image/mania-done-20200423104752_nmsolcwl.jpg" />
+      </image>
+    </ImageView>
+    <FlowPane alignment="CENTER" hgap="30.0" prefHeight="643.0" prefWidth="276.0" vgap="60.0">
+      <children>
+        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="60.0" prefWidth="100.0" text="new">
+          <font>
+            <Font size="17.0" fx:id="x2" />
+          </font>
+        </Button>
+        <Button mnemonicParsing="false" prefHeight="60.0" prefWidth="100.0" text="TOP10">
+          <font>
+            <Font name="System Bold" size="17.0" fx:id="x1" />
+          </font>
+        </Button>
+        <Button font="$x1" mnemonicParsing="false" prefHeight="60.0" prefWidth="100.0" text="Adidas" />
+        <Button font="$x1" graphicTextGap="4.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="100.0" text="Nike" textAlignment="LEFT" wrapText="false" />
+        <Button mnemonicParsing="false" prefHeight="60.0" prefWidth="100.0" text="New Balance">
+          <font>
+            <Font size="12.0" />
+          </font>
+        </Button>
+        <Button font="$x2" mnemonicParsing="false" prefHeight="60.0" prefWidth="100.0" text="Vans" />
+        <Button font="$x1" mnemonicParsing="false" prefHeight="60.0" prefWidth="100.0" text="Search" />
+        <Button font="$x1" mnemonicParsing="false" prefHeight="60.0" prefWidth="100.0" text="Exit" />
+      </children>
+      <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+      </padding>
+    </FlowPane>
+  </children>
+</HBox>

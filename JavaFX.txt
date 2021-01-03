@@ -1,0 +1,316 @@
+JavaFx
+ - AWT(Abstract Window Toolkit)
+   · 운영체제가 제공하는 네이티브 UI 컴포넌트를 이용
+       (운영체제에 따라 UI 모양이 다르고 종류도 제한적) 
+ - Swing
+   · 모든 운영체제상에서 동일한 UI를 갖도록 자신만의 UI를 가짐
+   · 네이티브UI로 보여지도록 자신의 UI를 다시 드로잉해야 하기 때문에
+       메모리 사용, CPU 사용이 많아서 실행 성능이 느려져서 잘 사용하지 않음
+   · 현재는 운영체제가 제공하는 UI의 퀄리티가 높아져서 더더욱 사용하지 않음
+
+ - JavaFX
+   · 데스크탑 뿐 아니라 임베디드까지 적용할 수 있도록 가볍고 풍부한 UI 제공
+   · 레이아웃(화면을 구성하는 컴포넌트들의 배치), 
+       스타일(모양, 색상 등), 
+       애플리케이션 로직을 분리해서 개발
+       (여러명이 동시에 개발하기 좋다.)
+
+메인 클래스
+ - Application을 상속
+ - public class AppMain extends Application{
+	@Override
+	public void start(Stage primaryStage) throws Exception{//start()는 코드에서 직접 호출할 수 없음
+		       //Stage : 윈도우 창
+		primaryStage.show();//윈도우 보여주기
+	} 
+	public static void main(String[] args){
+		launch(args);//appMain 객체 생성 및 메인 윈도우 생성
+	}
+   }
+   ※ start()는 코드에서 직접 호출할 수 없고,
+      main()에서 Application의 정적 메소드인 launch()를 호출함으로써 내부적으로 호출이되는 것
+
+   ※ 순서
+      1. main()에서 launch() 호출
+         - 호출되면 2개의 Thread가 생성
+      2. JavaFX Application Thread가 기본 생성자 호출
+      3. JavaFX launch()가 init() 호출
+         - 여기서 UI 생성, 변경코드 작성시 예외 발생(JavaFX Application Thread에서만 작성)
+         - 주로 실행 매개값을 JavaFX Application Thread에 전달할 목적으로 사용
+      4. JavaFX Application Thread가 start() 호출
+         - 주로 여기서 UI 생성, 변경코드 작성
+      5. 사용
+      6. Platform.exit() or x버튼을 누르면 마지막 Stage가 닫힘
+      7. JavaFX Application Thread가 stop() 호출
+         - 종료되기 전에 마무리할 코드를 작성하는 부분
+      8. 종료
+      일반적으로 start()만 재정의해서 사용한다.★
+    
+   ※ JavaFX Application Thread : UI를 변경, 생성하는 Thread
+			      다른 Thread가 UI를 변경, 생성하면 예외가 발생함
+
+메인 클래스 실행 매개값 얻기
+ - java AppMain --ip(key) = value --port(key) = value ...
+ - init()에서 매개값을 얻을 수 있음
+   · getParameters()를 호출해서 Parameters 객체를 얻고
+     객체.getRaw() or getNamed()를 사용하면 매개값을 얻을 수 있다.
+     1) getRaw() : 하나의 키와 값을 하나의 Row로 보고 List 컬렉션에 넣어서 리턴
+     2) getNamed() : 하나의 키와 값을 Entry로 만들어서 Map에 저장하고 리턴(주로 사용★)
+
+무대와 장면
+ - 무대(Stage) : 하나의 장면을 가질 수 있음
+ - 장면(Scene) : javafx.scene.Scene으로 표현
+ ※ 윈도우에 어떤 내용을 넣고 싶으면 Scene 객체를 만들어서 Stage에 추가
+   · Scene scene = new Scene(parent root);//장면 안에 들어가는 실제 내용부분
+     ※ parent : 장면에 실제 내용을 가지고 있음
+	       컨테이너로 만들며, 내용의 제일 위에 있어서 루트 컨테이너라고도 부름
+     primaryStage.setScene(scene);
+     primaryStage.show();
+
+ ※ Stage : 윈도우창, 하나의 Scene만 가지고 있다.
+              새로운 Scene를 보여주고 싶으면 setScene()
+
+
+레이아웃
+ - Scene에 있는 컨트롤(버튼, 라벨)을 배치하는 것
+ - 프로그램적 레이아웃
+   · 자바 코드로 컨트롤을 배치
+   · 코드가 잘 정리되지 않으면 난해한 프로그램이 될 확률이 높음
+   · 디자이너와 협력해서 개발하기 힘듬(자바 코드로 배치하는 것이라서)
+   · 간단한 변경을 해도 자바 소스를 수정하고 재컴파일 해야함
+
+ - FXML 레이아웃
+   · XML 기반의 마크업 언어
+   · JavaFX UI레이아웃을 자바 코드에서 분리해서 태그로 선언하는 방법을 제공
+     (배치 부분을 자바 코드에서 빼서 XML을 사용해서 만들고(디자이너), 이벤트코드만 자바에서 개발(개발자))
+   · 간단한 변경시 자바 소스를 수정할 필요가 없음
+   · 레이아웃이 비슷한 Scene들간에 재사용이 가능
+
+레이아웃 여백 : margin과 padding
+ - 컨트롤과 컨트롤 사이의 여백
+ - margin : 바깥 여백
+	   "버튼을 기준"으로 밖의 여백을 얼마만큼 줄 것인가?
+	   Button button = new Button();//얘는 버튼이 기준이라 버튼 객체 생성
+               HBox.setMargin(button, new Insets(50));
+ - padding : 안쪽 여백
+                 "컨테이너를 기준"으로 얼마만큼 안쪽으로 여백을 주고 컨트롤을 배치할 것인가?
+	     HBox hbox = new Hbox();//얘는 컨테이너가 기준이나 컨테이너 객체 생성
+	     hbox.setPadding(new Insets(50)); //50픽셀만큼 들여쓰기 한 위치에 컨트롤 배치
+
+ - top, right, bottom, left 중 원하는 곳에만 여백을 주고 싶을 경우
+    new Insets(double top, double right, double bottom, double left)를 사용
+    순서는 top부터 시계방향
+
+FXML 작성 규칙 
+ - FXML 태그는 자바 코드로 변환되어 실행되기 때문에 자바 코드와 매핑 관계가 존재
+ - 태그명 = 클래스명
+    다른 패키지의 클래스 이름으로 태그를 작성하려면 import 필요
+ - 네임스페이스 : 태그를 정의할 때 선언하는 태그의 고유한 이름
+	           fx:, :fx, /fx 구조면 네임스페이스를 가지고 있는 태그라고 생각하면 된다.
+
+태그 선언
+ - FXML 태그는 <> 사이에 태그 이름을 작성한 것
+    반드시 시작 태그가 있으면 끝 태그도 있어야 함
+    <시작태그> ... </끝태그>
+
+ - 시작 태그만 있고 끝 태그가 없는 경우도 있긴 함
+    <시작태그/> = 시작 태그인 동시에 끝 태그
+
+ - 태그 이름은 JavaFX의 클래스명이거나, Setter 메소드명
+    Button button = new Button();		<Button>
+    button.setText("확인");		→	       <text> 확인</text>
+					</Button>
+
+속성 선언
+ - <태그이름 속성명 = "값" 속성명 = '값'> ... </태그이름>
+    "" 혹은 ''로 값을 감싸야 함
+    <Button>				
+            <text> 확인</text>	→ 	<Button text="확인"/>
+    </Button>    
+ - 단, 모든 Setter가 가능한 것은 아니다.
+     매개타입이 기본타입이거나 String만 가능
+
+객체 선언
+ - 클래스명으로 태그를 작성하면 기본 생성자를 호출해서 객체가 생성되는 것
+ - 만약 명시적 생성자로 태그를 작성하는 경우
+    <클래스 속성="값">
+    단, 생성자의 매개변수가 @NamedArg(javafx.beans.NamedArg)가 적용되있을 경우만 가능
+    대부분은 가능하다.
+					   <HBox>
+    HBox hbox = new HBox();				<Padding>
+    hbox.setPadding(new Insets(10,10,10,10));   →		<Insets top="10", right="10",
+							          bottom="10", left="10">
+							//혹은 <Insets topRightBottomLeft="10"/>
+						</Padding>
+					   </Hbox>
+
+ - new 연산자로 객체를 생성하지 않고, valueOf(String)을 사용
+    <클래스 fx:value="값">
+    String.valueOf("Hello");		<String fx:value="Hello"/>
+    Integer.valueOf("1");	   →	<Integer fx:value="1"/>
+    Double.valueOf("1.0");		<Double fx:value="1.0"/>
+    Boolean.valueOf("false");		<Boolean fx:value="false"/>
+
+ - 클래스에 정의된 상수값을 얻고 싶은 경우
+    <클래스 fx:constant="상수">
+    Button button = new Button();		<Button>
+    button.setMaxWidth(			         <maxWidth>
+	Double.MAX_VALUE	→		       <Double fx:constant="MAX_VALUE"/>
+    );					         </maxWidth>
+					</Button>
+
+ - new 연산자로 객체를 생성할 수 없고, 정적 메소드로 객체를 얻어야 하는 경우(싱글턴패턴)
+    <클래스 fx:factory="정적메소드">
+    ComboBox combo = new ComboBox();		<ComboBox>
+    combo.setItems(					<items>
+	FXCollections observableArrayList( 				<FXCollections fx:factory="observableArrayList"
+		"공개", "비공개"		 →				<String fx:value="공개"/>
+	)								<String fx:value="비공개"/>
+    );								</FXCollections>
+							</items>
+						</ComboBox>
+
+FXML 로딩과 Scene 생성
+ - FXML 로딩
+   · FXML 파일을 읽어들여 선언된 내용을 객체화
+   · FXMLLoader의 load() 메소드를 이용
+      1) Parent root = FXMLLoader.load(getClass().getResource("xxx.fxml"));//주로 사용
+      2) FXMLLoader loader = new FXMLLoader(getClass().getResource("xxx.fxml"));
+         Parent root = (Parent)loader.load();
+   · load()가 리턴하는 실제 객체는 FXML 파일에서 루트 태그로 선언된 컨테이너
+     HBox hbox = (HBox) FXMLLoader.load(getClass().getResource("xxx.fxml"));
+
+ - Scene 객체 생성
+   · FXML 로딩후 얻은 루트 컨테이너는 Scene을 생성할 때 매개값으로 사용
+     Scene scene = new Scene(root);
+
+JavaFX Scene Builder
+ - 오라클은 FXML 파일을 처음 작성하는 개발자들을 위해 FXML을 자동으로 완성시켜주는
+   WYSIWYG 디자인 툴을 제공
+
+컨테이너
+ - 레이아웃을 작성할 때 다양한 컨트롤들을 쉽게 배치할 수 있도록 해주는 역할
+    (컨테이너에 따라 배치하는 방법과 모양이 다름)
+ - XXXPane은 모두 컨테이너, 그 외 Bbox, Vbox
+
+ - AnchorPane 
+   · 컨트롤을 좌표를 이용해 배치
+   · (0, 0)이 기준
+   · prefWidth(가로), prefHeight(세로)
+     pref : 선호하는이란 뜻
+   · <children> : 컨트롤을 포함
+   · 왠만하면 Scene Builder를 사용하는게 편함
+
+ - HBox(Horizontal)와 VBox(Verticality)
+   · 수평과 수직으로 컨트롤을 배치
+   · HBox에서 컨트롤의 높이는 HBox의 높이만큼 확장
+   · VBox에서 컨트롤의 폭은 VBox의 폭만큼 확장
+   · prefWidth(가로, 폭), prefHeight(세로, 높이)
+   · alignment : 정렬
+   · spacing : 컨트롤간의 간격
+   · fillWidth, fillHeight : 폭, 높이 확장 여부 true/false
+   · <children> : 컨트롤을 포함
+   · <HBox.hgrow> 또는 <VBox.vgrow>
+	<Priority fx:constant="ALWAYS"/> : HBox or VBox의 남은 높이, 폭을 채움
+     </HBox.hgrow> 또는 </VBox.vgrow>
+   · 버튼은 만들어지면 Max Width와 Max Height가 고정되기 때문에 MAX_VALUE로 바꿔주면 확장
+
+ - BorderPane 컨테이너
+   · top, bottom, left, right, center 셀에 컨트롤을 배치하는 컨테이너
+   · 각 셀에는 하나의 컨트롤 또는 컨테이너만 배치
+   · top, bottom, left, right에 배치하지 않으면 center에 배치된 컨트롤이 확장
+   · prefWidth(가로, 폭), prefHeight(세로, 높이)
+   · <top>, <bottom>, <right>, <left> : 각 구역에 배치될 컨트롤을 포함
+   · Scene Builder보다 자바 코드로 작성하는 것이 낫다
+
+ - FlowPane 컨테이너
+   · 행으로 컨트롤을 배치하되 공간이 부족하면 새로운 행에 배치하는 컨테이너
+        윈도우창의 크기를 조절하면 컨트롤도 같이 움직임
+   · prefWidth(가로, 폭), prefHeight(세로, 높이)
+   · hgap, vgap : 컨트롤간의 수평, 수직 간격을 설정
+   ex) <FlowPane xmlns:fx="http://javafx.com/fxml/1" prefWidth="300" prefHeight="70" hgap="10" vgap="10">
+   · <children> : 컨트롤을 포함
+
+ - TilePane 컨테이너
+   · 그리드로 컨트롤을 배치하되 고정된 셀 크기를 갖는 컨테이너
+     (셀들의 크기는 동일하다.)
+   · FlowPane과 마찬가지로 행방향으로 배치하되 공간이 부족하면 새로운 행에 배치
+   · prefWidth(가로, 폭), prefHeight(세로, 높이) : 전체의 크기
+   · prefTileWidth(가로, 폭), prefTileHeight(세로, 높이) : 셀(타일)의 크기
+   · <children> : 컨트롤을 포함
+
+ - GridPane 컨테이너
+   · 그리드로 컨트롤을 배치하되 셀의 크기가 고정적이지 않고 유동적인 컨테이너
+      (컬럼인덱스와 로우인덱스를 이용해서 배치)
+   · 셀 병합이 가능함
+   · prefWidth(가로, 폭), prefHeight(세로, 높이) : 전체의 크기
+   · hgap, vgap : 컨트롤간의 수평, 수직 간격을 설정
+   · <children> : 컨트롤을 포함
+   · GridPane.rowIndex, columnIndex : 컨트롤이 위치하는 컬럼 행, 열 인덱스를 설정
+   · GridPane.rowSpan, columnSpan : 행, 열 병합 수를 설정
+   · GridPane.hgrow, vgrow : 수평, 수직 빈 공간 채우기를 설정
+   · GridPane.halignment, valignment : 컨트롤의 수평, 수직 정렬을 설정
+   ※ GridPane이 붙은 태그 및 속서은 컨트롤에서 작성
+       나머진 컨테이너에서 작성
+
+ - StackPane 컨테이너
+   · 컨트롤을 겹쳐 배치하는 컨테이너 (Stack 구조와 같음)
+   · 위에 있는 컨트롤이 투명이라면 밑에 있는 컨트롤이 겹쳐 보임
+   · fitWidth, fitHeight : 가로, 세로
+   · preserveRatio : 이미지의 가로, 세로를 유지한 채 보여지게 하는 것, true/false
+                         가로, 세로의 길이가 정해져있어도 preserveRatio가 true면 
+		 이미지의 비율에 맞춰 가로 or 세로 중 하나만 따른다.(이 경우 가로, 세로의 길이를 둘 다 입력할 필요x)
+                         false면 이미지의 비율을 무시하고 정해진 가로와 세로의 길이를 따른다.
+
+※ Exception in Application start method 에러가 발생하면 import도 확인해보기
+※ 컨테이너에서 지정하는 크기는 선호하는(pref) 크기일 뿐이라서
+      primaryStage.setWidth(Height)를 사용해서 크기를 변경할 수 있다.
+
+이벤트 처리
+ - EventHandler
+   · 이벤트를 처리하는 자
+   · 예를 들어 버튼을 클릭하면 액션이벤트가 발생하고 이벤트 핸들러가 처리
+     이벤트핸들러는 이벤트를 처리하기 위해 자신이 가지고 있는 handle()을 호출하여 처리
+   · 이벤트핸들러를 등록하는 메소드는 전부 setOn으로 시작
+   · 이벤트핸들러는 함수적 인터페이스라서 람다식을 사용할 수 있다.
+   · 예시
+     Button btn1 = new Button("버튼1");
+     btn1.setOnAction(event->System.out.println("뀨잉"));
+
+ - FXML 컨트롤러
+   · 이벤트 처리를 위한 클래스 파일
+     (이벤트 처리는 결국 자바 코드로 해야해서 자바 클래스 파일이 필요)
+   · FXML 파일당 별도의 컨트롤러를 지정해서 이벤트 처리
+     (FXML 레이아웃과 이벤트 처리 코드를 완전히 분리)
+   · fx:controller 속성과 컨트롤러 클래스
+     <루트컨테이너 xmlns:fx="http://javafx.com/fxml"
+         fx:controller="컨트롤러의 패키지이름과 클래스 이름">
+         = fx가 로딩이 될 때 자동적으로 객체가 생성되며
+	지정된 컨트롤러는 반드시 클래스로 선언되어 있어야 하고
+	Initializable 인터페이스의 구현클래스여야 함.
+	
+   · EventHandler 생성 및 등록
+     Initializable 인터페이스의 initialize(URL location, ResourceBundle resources)는
+     컨트롤러가 생성이 되면 자동으로 호출
+     주로 이벤트 처리를 하는 코드가 작성
+     Initializable 인터페이스도 함수적 인터페이스라서 람다식 사용 가능
+     이벤트처리 내용이 많다면 새로운 메소드를 만들어서 이벤트 처리하는 코드를 작성하고
+     initialize에서 호출만 함
+     혹은 FXML 레이아웃에서 버튼 태그를 작성할 때
+     onAction="#handleBtnAction"을 넣어주면 handleBtnAction이 컨트롤러의 메소드 이름이 된다.
+     여기서 #은 컨트롤러에 있는 이 메소드를 실행하라는 의미
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
